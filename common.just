@@ -1,4 +1,4 @@
-# common.just — shared by every project. Synced from ~/coding/just-common;
+# common.just — shared by every project. Synced from github.com/p-arndt/just-common;
 # edit it there, then run `just sync-common` in each project.
 #
 # Import this first, then the stack modules the project needs:

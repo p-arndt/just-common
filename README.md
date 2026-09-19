@@ -2,7 +2,8 @@
 
 Shared [just](https://just.systems) recipes for all projects. Each project keeps a
 **copy** in `.just/` (committed, so CI and other machines work) and pulls updates
-with `just sync-common`.
+from this repo with `just sync-common` — on macOS, Linux and Windows, no local
+checkout needed.
 
 | Module | Recipes | Project sets |
 |---|---|---|
@@ -15,9 +16,19 @@ with `just sync-common`.
 
 ## Adopt in a project
 
+Download the modules the project needs into `.just/`:
+
 ```sh
-mkdir -p .just && cp ~/coding/just-common/{common,go,release}.just .just/
+mkdir -p .just
+for m in common go release; do curl -fsSL "https://raw.githubusercontent.com/p-arndt/just-common/main/$m.just" -o ".just/$m.just"; done
 ```
+
+```powershell
+New-Item -ItemType Directory -Force .just | Out-Null
+foreach ($m in 'common','go','release') { Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/p-arndt/just-common/main/$m.just" -OutFile ".just/$m.just" }
+```
+
+Then the project's `justfile`:
 
 ```just
 import '.just/common.just'
@@ -25,7 +36,7 @@ import '.just/go.just'
 import '.just/release.just'
 
 BIN_NAME := "hop"
-BUILDINFO_PKG := "hop/internal/buildinfo"
+BUILDINFO_PKG := "github.com/p-arndt/hop/internal/buildinfo"
 ```
 
 - Override a default variable: add `set allow-duplicate-variables`, then redefine it.
@@ -34,5 +45,9 @@ BUILDINFO_PKG := "hop/internal/buildinfo"
 
 ## Update
 
-Edit the module here, commit, then run `just sync-common` in each project and commit
-the changed `.just/` files there. Set `JUST_COMMON` if this checkout lives elsewhere.
+Change a module here, commit, push. Then run `just sync-common` in each project
+and commit the changed `.just/` files there.
+
+- `JUST_COMMON=/path/to/just-common just sync-common` copies from a local
+  checkout instead, to try changes before pushing them.
+- `JUST_COMMON_REF=<tag or branch>` pins what is downloaded (default `main`).
